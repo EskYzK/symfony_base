@@ -2,12 +2,12 @@
 # see: https://developers.google.com/idx/guides/customize-idx-env
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-23.11"; # or "unstable"
+  channel = "unstable"; # or "stable-23.11"
   # Use https://search.nixos.org/packages to find packages
   packages = [
-    pkgs.php
+    pkgs.php84
     pkgs.symfony-cli
-    pkgs.php82Packages.composer
+    pkgs.php84Packages.composer
   ];
 
   services.mysql = {
