@@ -1,6 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Candidature - Étape {{ form.vars.cursor.stepIndex + 1 }}/{{ form.vars.cursor.totalSteps }}{% endblock %}
+{% block title %}Candidature - Étape {{ currentStep }}/{{ totalSteps }}{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
@@ -10,26 +14,25 @@
             
             {# Indicateur de progression #}
             <div class="progress mb-4" style="height: 30px;">
-                {% set progress = (form.vars.cursor.stepIndex + 1) / form.vars.cursor.totalSteps * 100 %}
-                <div class="progress-bar" role="progressbar" 
+                <div class="progress-bar bg-success" role="progressbar" 
                      style="width: {{ progress }}%;" 
                      aria-valuenow="{{ progress }}" 
                      aria-valuemin="0" 
                      aria-valuemax="100">
-                    Étape {{ form.vars.cursor.stepIndex + 1 }} / {{ form.vars.cursor.totalSteps }}
+                    Étape {{ currentStep }} / {{ totalSteps }}
                 </div>
             </div>
 
             {# Affichage conditionnel selon l'étape #}
-            {% if form.vars.cursor.currentStepName == 'summary' %}
-                {# Étape 5 : Résumé #}
+            {% if currentStepName == 'summary' %}
+                {# Étape finale : Résumé #}
                 <div class="card">
                     <div class="card-header bg-primary text-white">
                         <h3>Résumé de votre candidature</h3>
                     </div>
                     <div class="card-body">
                         <h5>Informations personnelles</h5>
-                        <ul>
+                        <ul class="list-unstyled">
                             <li><strong>Prénom :</strong> {{ candidate.firstName }}</li>
                             <li><strong>Nom :</strong> {{ candidate.lastName }}</li>
                             <li><strong>Email :</strong> {{ candidate.email }}</li>
@@ -38,34 +41,70 @@
                             {% endif %}
                         </ul>
 
+                        <hr>
+
                         <h5 class="mt-3">Expérience</h5>
                         {% if candidate.hasExperience %}
-                            <p><strong>A de l'expérience :</strong> Oui</p>
-                            <p><strong>Détails :</strong> {{ candidate.experienceDetails }}</p>
+                            <p><strong>A de l'expérience :</strong> <span class="badge bg-success">Oui</span></p>
+                            <p><strong>Détails :</strong></p>
+                            <p class="border p-3 bg-light">{{ candidate.experienceDetails }}</p>
                         {% else %}
-                            <p><strong>A de l'expérience :</strong> Non</p>
+                            <p><strong>A de l'expérience :</strong> <span class="badge bg-secondary">Non</span></p>
                         {% endif %}
 
+                        <hr>
+
                         <h5 class="mt-3">Disponibilité</h5>
-                        <p><strong>Date de disponibilité :</strong> {{ candidate.availabilityDate|date('d/m/Y') }}</p>
+                        {% if candidate.availabilityDate %}
+                            <p><strong>Date de disponibilité :</strong> {{ candidate.availabilityDate|date('d/m/Y') }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
-                {# Formulaire avec seulement les boutons de navigation #}
+                {# Boutons de navigation pour le résumé #}
                 {{ form_start(form) }}
                     <div class="d-flex justify-content-between mt-4">
-                        {{ form_row(form.navigator) }}
+                        <button type="submit" name="action" value="previous" class="btn btn-secondary">
+                            ← Retour
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            ✓ Soumettre ma candidature
+                        </button>
                     </div>
                 {{ form_end(form) }}
+
             {% else %}
-                {# Étapes 1-4 : Affichage du formulaire normal #}
+                {# Étapes intermédiaires : Affichage du formulaire #}
                 <div class="card">
+                    <div class="card-header bg-light">
+                        <h4>
+                            {% if currentStepName == 'personal_info' %}
+                                Informations personnelles
+                            {% elseif currentStepName == 'experience' %}
+                                Votre expérience
+                            {% elseif currentStepName == 'availability' %}
+                                Votre disponibilité
+                            {% elseif currentStepName == 'consent' %}
+                                Consentement RGPD
+                            {% endif %}
+                        </h4>
+                    </div>
                     <div class="card-body">
                         {{ form_start(form) }}
                             {{ form_widget(form) }}
                             
                             <div class="d-flex justify-content-between mt-4">
-                                {{ form_row(form.navigator) }}
+                                {% if not isFirstStep %}
+                                    <button type="submit" name="action" value="previous" class="btn btn-secondary">
+                                        ← Précédent
+                                    </button>
+                                {% else %}
+                                    <div></div>
+                                {% endif %}
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    Suivant →
+                                </button>
                             </div>
                         {{ form_end(form) }}
                     </div>
@@ -74,4 +113,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
