@@ -48,6 +48,9 @@ class Candidate
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $updatedAt = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $currentStep = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -182,6 +185,17 @@ class Candidate
     {
         $this->updatedAt = $updatedAt;
 
+        return $this;
+    }
+
+    public function getCurrentStep(): ?string
+    {
+        return $this->currentStep;
+    }
+
+    public function setCurrentStep(?string $currentStep): static
+    {
+        $this->currentStep = $currentStep;
         return $this;
     }
 }
